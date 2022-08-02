@@ -48,12 +48,6 @@ class LyricsNLP:
                 tokens.add(token.text)
         return list(tokens)
 
-
-
-lnlp = LyricsNLP("Stan", "Eminem")
-print(lnlp.analyze_tone())
-print(lnlp.get_keywords())
-
     
     
     
