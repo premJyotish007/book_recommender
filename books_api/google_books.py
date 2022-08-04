@@ -52,8 +52,11 @@ class BookScraper:
                 time.sleep(1)
         return list_titles
 
+    def get_book_info(self, book, author):
+        url = self.base_url + book + "inauthor:" + author
+        return url
+
     def append_data(self, dicts, file) -> None:
-        headers = []
         df = pd.DataFrame()
         try:
             df = pd.read_csv(file, usecols=self.headers)
@@ -63,8 +66,11 @@ class BookScraper:
         df = df.append(dicts, ignore_index=True)
         df.to_csv(file, index = False)
 
-    def get_book_info(self, volumeInfo):
+    def get_book_info(self, volumeInfo: dict = "", book = "", author = ""):
         to_return = {}
+        if (len(volumeInfo) == 0):
+            url = self.base_url + "+intitle:" + book + "&inauthor:" + author
+            volumeInfo = json.loads(req.get(url).text)["items"][0]["volumeInfo"]
         for point in self.headers:
             try:
                 to_return[point] = volumeInfo[point]
@@ -78,4 +84,3 @@ class BookScraper:
                 line = line.strip()
                 dicts = self.get_books_by_author(line)
                 self.append_data(dicts, output_file)
-
