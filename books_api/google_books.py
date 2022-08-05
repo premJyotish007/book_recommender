@@ -17,8 +17,6 @@ class BookScraper:
         set_titles = set()
         list_titles = []
         names = author.split(" ")
-        first_name = names[0].lower()
-        last_name = names[1].lower()
         while (True):
             try:
                 url = self.base_url + "+inauthor:" + author + "&maxResults=40&startIndex=" + str(index)
@@ -30,8 +28,10 @@ class BookScraper:
                         if "title" in item["volumeInfo"]:
                             volumeInfo = item["volumeInfo"]
                             current_title = volumeInfo["title"]
-                            if (first_name not in (current_title.lower())
-                                            and last_name not in (current_title.lower()) and ';' not in current_title):
+                            for name in names:
+                                if name in current_title.lower():
+                                    continue
+                            if (';' not in current_title):
                                 set_titles.add(current_title)
                                 if (len(set_titles) > size):
                                     valid = True

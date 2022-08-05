@@ -1,23 +1,22 @@
 from msilib.schema import File
-from requests import head
-import spotifyAPI
+import music_api.spotifyAPI
 import pandas as pd
 
 class TrackAnalysis:
     def __init__(self) -> None:
-        self.spotify = spotifyAPI.TrackInfo()
+        self.spotify = music_api.spotifyAPI.TrackInfo()
 
     def get_artists_from_file(self, file) -> list[str]:
         artists = []
         with open (file, "r") as input_file:
             lines = input_file.readlines()
             artists = [line.strip() for line in lines]
-        return artists
+        return set(artists)
 
     def append_data(self, dicts, file) -> None:
         headers = []
-        with open("analysis_headers.txt", "r") as headers_file:
-            headers = [line for line in headers_file.readlines()]
+        with open("C:/Users/harsh/Desktop/spotify api/book_recommender/music_api/analysis_headers.txt", "r") as headers_file:
+            headers = [line.strip() for line in headers_file.readlines()]
         df = pd.DataFrame()
         try:
             df = pd.read_csv(file, usecols=headers)
@@ -52,7 +51,7 @@ class TrackAnalysis:
         return self.spotify.track(track_uri)
     
     def append_artists(self, file, output_file) -> None:
-        with open(file, "r") as input_file:
-            for line in input_file.readlines():
-                dicts = self.generate_track_data(line)
-                self.append_data(dicts, output_file)
+        for line in self.get_artists_from_file(file):
+            print(f"Appending {line},")
+            dicts = self.generate_track_data(line)
+            self.append_data(dicts, output_file)
