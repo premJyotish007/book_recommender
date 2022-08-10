@@ -1,5 +1,6 @@
 # Cram Your Jam
 
+<hr>
 Book recommendation algorithm that relies on a user's song playlist to make accurate suggestions for next books to read.
 
 As two mediums of expressions inherently tied to the same emotional stimulator: text/lyrics, the choice of your songs can reveal a lot about what books you might be interested in, through the song pace, its genres, any specific themes and/or nouns associated with it, and so on.
