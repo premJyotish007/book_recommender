@@ -43,5 +43,3 @@ class TrackInfo:
 
     def get_genres_list(self):
         return self.spotify.recommendation_genre_seeds()
-t = TrackInfo()
-print(t.get_track_uri("Beat It"))
