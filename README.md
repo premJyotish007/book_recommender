@@ -1,4 +1,4 @@
-<font size = "3"> # Cram Your Jam </font>
+# Cram Your Jam
 
 Book recommendation algorithm that relies on a user's song playlist to make accurate suggestions for next books to read.
 
