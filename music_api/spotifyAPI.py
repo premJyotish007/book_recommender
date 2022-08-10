@@ -17,6 +17,10 @@ class TrackInfo:
     def get_album_uri(self, search_query) -> str:
         result = self.spotify.search(search_query, 5, type = 'album')
         return result['albums']['items'][0]["uri"]
+    
+    def get_track_uri(self, search_query) -> str:
+        result = self.spotify.search(search_query, 1, type = 'track')
+        return (result['tracks']['items'][0]["uri"], result['tracks']['items'][0]["album"]["artists"][0]["name"])
 
     def get_albums(self, artist_uri, n = 20) -> list[list[str]]:
         to_return = []
@@ -39,4 +43,5 @@ class TrackInfo:
 
     def get_genres_list(self):
         return self.spotify.recommendation_genre_seeds()
-    
+t = TrackInfo()
+print(t.get_track_uri("Beat It"))

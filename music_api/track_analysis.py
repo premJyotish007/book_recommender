@@ -44,25 +44,36 @@ class TrackAnalysis:
                 song = self.spotify.track(track)["name"]
                 songs.add(song)
                 if (len(songs) > size):
-                    to_append = self.spotify.track_features(track)[0]
-                    to_append['artist'] = a
-                    to_append['song'] = song
-
-                    # Obtaining lyrics of a song
-                    lyrics = self.ls.get_lyrics(song, a)
-                    lyrics = self.process_lyrics(lyrics, song)
-                    if (lyrics == "not found" or "1." in lyrics):
-                        continue
-                    to_append["lyrics"] = lyrics
-
-                    # Analyzing lyrics
-                    analysis = self.nlp.analyze(text = lyrics)
-                    tones_to_analyze = ["sadness", "joy", "fear", "disgust", "anger"]
-                    for tone in tones_to_analyze:
-                        to_append[tone] = self.tone_value(analysis, tone)
-                    dicts.append(to_append)
+                    to_append = self.get_track_info(a, song, track)
+                    if (len(to_append) > 0):
+                        dicts.append(to_append)
                     size += 1
         return dicts
+    
+    def get_track_info(self, song, a = "", track = ""):
+        if (len(track) == 0):
+            track_info = self.spotify.get_track_uri(song)
+            track = track_info[0]
+            a = track_info[1]
+        to_return = self.spotify.track_features(track)[0]
+        to_return['artist'] = a
+        to_return['song'] = song
+
+        # Obtaining lyrics of a song
+        lyrics = self.ls.get_lyrics(song, a)
+        lyrics = self.process_lyrics(lyrics, song)
+        if (lyrics == "not found" or "1." in lyrics):
+            return {}
+        to_return["lyrics"] = lyrics
+
+        # Analyzing lyrics
+        analysis = self.nlp.analyze(text = lyrics)
+        tones_to_analyze = ["sadness", "joy", "fear", "disgust", "anger"]
+        for tone in tones_to_analyze:
+            to_return[tone] = self.tone_value(analysis, tone)
+        return to_return
+
+
 
     def get_track(self, track_uri) -> str:
         return self.spotify.track(track_uri)
