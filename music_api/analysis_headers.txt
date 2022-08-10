@@ -16,5 +16,11 @@ track_href
 analysis_url
 duration_ms
 time_signature
-Artist
-Song
+artist
+song
+lyrics
+sadness
+joy
+fear
+disgust
+anger

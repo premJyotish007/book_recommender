@@ -6,10 +6,14 @@ class LyricsScraper:
         self.genius = lg.Genius(auth_input, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True)
     
     def get_lyrics(self, song, artist = ""):
+        iterations = 0
         while (True):
             try:
                 return self.genius.search_song(song).lyrics if (artist == "") else self.genius.search_song(song, artist).lyrics
             except:
+                iterations += 1
+                if (iterations == 5):
+                    return "Lyrics not found"
                 time.sleep(1)
 
     def get_songs_from_artist(self, artist, n = 10):

@@ -1,10 +1,14 @@
 from msilib.schema import File
 import music_api.spotifyAPI
 import pandas as pd
+import music_api.GeniusAPI as genius_api
+import NLP
 
 class TrackAnalysis:
     def __init__(self) -> None:
         self.spotify = music_api.spotifyAPI.TrackInfo()
+        self.ls = genius_api.LyricsScraper()
+        self.nlp = NLP.Analyze()
 
     def get_artists_from_file(self, file) -> list[str]:
         artists = []
@@ -15,7 +19,7 @@ class TrackAnalysis:
 
     def append_data(self, dicts, file) -> None:
         headers = []
-        with open("C:/Users/harsh/Desktop/spotify api/book_recommender/music_api/analysis_headers.txt", "r") as headers_file:
+        with open("music_api/analysis_headers.txt", "r") as headers_file:
             headers = [line.strip() for line in headers_file.readlines()]
         df = pd.DataFrame()
         try:
@@ -41,8 +45,21 @@ class TrackAnalysis:
                 songs.add(song)
                 if (len(songs) > size):
                     to_append = self.spotify.track_features(track)[0]
-                    to_append['Artist'] = a
-                    to_append['Song'] = song
+                    to_append['artist'] = a
+                    to_append['song'] = song
+
+                    # Obtaining lyrics of a song
+                    lyrics = self.ls.get_lyrics(song, a)
+                    lyrics = self.process_lyrics(lyrics, song)
+                    if (lyrics == "not found" or "1." in lyrics):
+                        continue
+                    to_append["lyrics"] = lyrics
+
+                    # Analyzing lyrics
+                    analysis = self.nlp.analyze(text = lyrics)
+                    tones_to_analyze = ["sadness", "joy", "fear", "disgust", "anger"]
+                    for tone in tones_to_analyze:
+                        to_append[tone] = self.tone_value(analysis, tone)
                     dicts.append(to_append)
                     size += 1
         return dicts
@@ -55,3 +72,41 @@ class TrackAnalysis:
             print(f"Appending {line},")
             dicts = self.generate_track_data(line)
             self.append_data(dicts, output_file)
+
+    def contains_proper_characters(self, lyrics):
+        if ("??" in lyrics):
+            return False
+        for char in lyrics:
+            if ord(char) > 128:
+                return False
+        return True
+    def process_lyrics(self, lyrics, song):
+        keywords = ["-", "(ft", "live", "(feat", "feat", "ft", "("]
+        if "1." in lyrics:
+            for keyword in keywords:
+                if (keyword in song):
+                    song = song[0:song.index(keyword)]
+                    break
+            lyrics = self.ls.get_lyrics(song)
+        if ("Lyrics" in lyrics):
+            try:
+                lyrics = lyrics[(lyrics.index("Lyrics") + 6): lyrics.index("Embed")]
+            except:
+                lyrics = lyrics[(lyrics.index("Lyrics") + 6):]
+            lyrics = str(lyrics).strip()
+        return lyrics
+    
+    def keywords(self, lyrics):
+        try:
+            keywords = self.nlp.get_keywords(lyrics)
+            keywords.sort()
+            return keywords
+        except:
+            return []
+    
+    def tone_value(self, tone_arr, tone_input):
+        for tone in tone_arr:
+            if (len(tone) > 0):
+                if (tone[0] == tone_input):
+                    return tone[1]
+        return 0
