@@ -1,6 +1,5 @@
 import spotipy
 import os
-import json
 from spotipy.oauth2 import SpotifyClientCredentials
 
 os.environ["SPOTIPY_CLIENT_ID"] = "987d1f0d327c4804bb7a2d487f3235ad"
