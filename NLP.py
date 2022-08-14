@@ -3,7 +3,9 @@ from string import punctuation
 
 # Natural Language Toolkit package
 from nltk.corpus import wordnet
-nlp = en_core_web_sm.load()
+import spacy
+spacy_nlp = spacy.load('en_core_web_md')
+import numpy as np
 
 # IBM Watson package
 from ibm_watson import NaturalLanguageUnderstandingV1
@@ -34,14 +36,23 @@ class Analyze:
             return [[], []]
     
     def get_keywords(self, text, types_tokens = ["NOUN"]):
-        doc = nlp(text.lower())
+        doc = spacy_nlp(text.lower())
         tokens = set()
         for token in doc:
-            if (token.text not in nlp.Defaults.stop_words and token.text not in punctuation and token.pos_ in types_tokens):
+            if (token.text not in spacy_nlp.Defaults.stop_words and token.text not in punctuation and token.pos_ in types_tokens):
                 tokens.add(token.text)
         response = self.natural_language_understanding.analyze(
             text = text,
             features = Features(keywords = KeywordsOptions())).get_result()
         return set([keyword["text"] for keyword in response["keywords"]] + list(tokens))
+    
+    def word_similarity(self, s1, s2):
+        t1 = spacy_nlp(s1.lower())
+        t2 = spacy_nlp(s2.lower())
+        # Tokenizes the word based on spacing, end words, etc. and then returns cosine similarity based on word vectors.
+        # word vectors are returned based on the word2vec model which looks at context, and distance to get to the next word.
+        return np.dot(t1.vector, t2.vector) / (t1.vector_norm * t2.vector_norm)
+            
+
     
     
